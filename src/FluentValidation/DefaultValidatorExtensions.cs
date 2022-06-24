@@ -19,6 +19,7 @@
 namespace FluentValidation {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Linq.Expressions;
 	using System.Reflection;
 	using System.Text.RegularExpressions;
@@ -168,7 +169,7 @@ namespace FluentValidation {
 		/// <param name="ruleBuilder">The rule builder on which the validator should be defined</param>
 		/// <param name="expression">The regular expression to check the value against.</param>
 		/// <returns></returns>
-		public static IRuleBuilderOptions<T, string> Matches<T>(this IRuleBuilder<T, string> ruleBuilder, string expression) {
+		public static IRuleBuilderOptions<T, string> Matches<T>(this IRuleBuilder<T, string> ruleBuilder, [StringSyntax(StringSyntaxAttribute.Regex)] string expression) {
 			return ruleBuilder.SetValidator(new RegularExpressionValidator<T>(expression));
 		}
 
@@ -242,7 +243,7 @@ namespace FluentValidation {
 		/// <param name="expression">The regular expression to check the value against.</param>
 		/// <param name="options">Regex options</param>
 		/// <returns></returns>
-		public static IRuleBuilderOptions<T, string> Matches<T>(this IRuleBuilder<T, string> ruleBuilder, string expression, RegexOptions options) {
+		public static IRuleBuilderOptions<T, string> Matches<T>(this IRuleBuilder<T, string> ruleBuilder, [StringSyntax(StringSyntaxAttribute.Regex)] string expression, RegexOptions options) {
 			return ruleBuilder.SetValidator(new RegularExpressionValidator<T>(expression, options));
 		}
 
