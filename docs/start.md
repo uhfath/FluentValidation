@@ -139,6 +139,20 @@ validator.Validate(customer, options =>
 });
 ```
 
+The way how [Rule Sets](rulesets), properties or [custom validator selectors](https://github.com/FluentValidation/FluentValidation/blob/main/src/FluentValidation/Internal/IValidatorSelector.cs) are combined is controled using [SetSelectorCombineMode](https://github.com/FluentValidation/FluentValidation/blob/main/src/FluentValidation/Internal/ValidatorSelectorCombineMode.cs):
+
+```csharp
+validator.Validate(customer, options => 
+{
+  options.ThrowOnFailures();
+  options.IncludeRuleSets("MyRuleSets");
+  options.IncludeProperties(x => x.Name);
+  options.SetSelectorCombineMode(ValidatorSelectorCombineMode.All); //only allow validator to execute when "MyRuleSets" match and a property validated is "Name"
+});
+```
+
+By default the mode is set to `ValidatorSelectorCombineMode.Any` which means that a validator will be executed when either "MuRuleSets" match **or** a property is "Name"
+
 # Complex Properties
 
 

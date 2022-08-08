@@ -22,13 +22,20 @@ using System.Collections.Generic;
 using System.Linq;
 
 internal class CompositeValidatorSelector : IValidatorSelector {
-	private IEnumerable<IValidatorSelector> _selectors;
+	private readonly IEnumerable<IValidatorSelector> _selectors;
+	private readonly ValidatorSelectorCombineMode _selectorCombineMode;
 
-	public CompositeValidatorSelector(IEnumerable<IValidatorSelector> selectors) {
+	public CompositeValidatorSelector(IEnumerable<IValidatorSelector> selectors, ValidatorSelectorCombineMode selectorCombineMode = ValidatorSelectorCombineMode.Any) {
 		_selectors = selectors;
+		_selectorCombineMode = selectorCombineMode;
 	}
 
 	public bool CanExecute(IValidationRule rule, string propertyPath, IValidationContext context) {
-		return _selectors.Any(s => s.CanExecute(rule, propertyPath, context));
+		return
+			_selectorCombineMode switch {
+				ValidatorSelectorCombineMode.All => _selectors.All(s => s.CanExecute(rule, propertyPath, context)),
+				ValidatorSelectorCombineMode.Any => _selectors.Any(s => s.CanExecute(rule, propertyPath, context)),
+				_ => throw new System.ArgumentOutOfRangeException(nameof(_selectorCombineMode), _selectorCombineMode, $"The value of {nameof(ValidatorSelectorCombineMode)} is not supported"),
+			};
 	}
 }

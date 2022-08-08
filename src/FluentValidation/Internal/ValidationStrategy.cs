@@ -27,6 +27,7 @@ public class ValidationStrategy<T> {
 	private List<string> _ruleSets;
 	private bool _throw = false;
 	private IValidatorSelector _customSelector;
+	private ValidatorSelectorCombineMode _selectorCombineMode = ValidatorSelectorCombineMode.Any;
 
 	internal ValidationStrategy() {
 	}
@@ -123,6 +124,15 @@ public class ValidationStrategy<T> {
 		return this;
 	}
 
+	/// <summary>
+	/// Sets current <see cref="ValidatorSelectorCombineMode"/> when multiple validator selectors are used
+	/// </summary>
+	/// <returns></returns>
+	public ValidationStrategy<T> SetSelectorCombineMode(ValidatorSelectorCombineMode selectorCombineMode) {
+		_selectorCombineMode = selectorCombineMode;
+		return this;
+	}
+
 	private IValidatorSelector GetSelector() {
 		IValidatorSelector selector = null;
 
@@ -141,7 +151,7 @@ public class ValidationStrategy<T> {
 				selectors.Add(ValidatorOptions.Global.ValidatorSelectors.RulesetValidatorSelectorFactory(_ruleSets.ToArray()));
 			}
 
-			selector = selectors.Count == 1 ? selectors[0] : new CompositeValidatorSelector(selectors);
+			selector = selectors.Count == 1 ? selectors[0] : new CompositeValidatorSelector(selectors, _selectorCombineMode);
 		}
 		else {
 			selector = ValidatorOptions.Global.ValidatorSelectors.DefaultValidatorSelectorFactory();

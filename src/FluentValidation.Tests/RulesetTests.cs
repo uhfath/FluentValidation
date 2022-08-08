@@ -236,7 +236,7 @@ namespace FluentValidation.Tests {
 		}
 
 		[Fact]
-		public void Combines_rulesets_and_explicit_properties() {
+		public void Combines_rulesets_and_any_explicit_property() {
 			var validator = new InlineValidator<Person>();
 			validator.RuleFor(x => x.Forename).NotNull();
 			validator.RuleFor(x => x.Surname).NotNull();
@@ -247,11 +247,49 @@ namespace FluentValidation.Tests {
 			var result = validator.Validate(new Person(), options => {
 				options.IncludeRuleSets("Test");
 				options.IncludeProperties(x => x.Forename);
+				options.SetSelectorCombineMode(ValidatorSelectorCombineMode.Any);
 			});
 
 			result.Errors.Count.ShouldEqual(2);
 			result.Errors[0].PropertyName.ShouldEqual("Forename");
 			result.Errors[1].PropertyName.ShouldEqual("Age");
+		}
+
+		[Fact]
+		public void Combines_rulesets_and_single_explicit_property_not_in_ruleset() {
+			var validator = new InlineValidator<Person>();
+			validator.RuleFor(x => x.Forename).NotNull();
+			validator.RuleFor(x => x.Surname).NotNull();
+			validator.RuleSet("Test", () => {
+				validator.RuleFor(x => x.Age).GreaterThan(0);
+			});
+
+			var result = validator.Validate(new Person(), options => {
+				options.IncludeRuleSets("Test");
+				options.IncludeProperties(x => x.Forename);
+				options.SetSelectorCombineMode(ValidatorSelectorCombineMode.All);
+			});
+
+			result.Errors.Count.ShouldEqual(0);
+		}
+
+		[Fact]
+		public void Combines_rulesets_and_single_explicit_property_in_ruleset() {
+			var validator = new InlineValidator<Person>();
+			validator.RuleFor(x => x.Forename).NotNull();
+			validator.RuleSet("Test", () => {
+				validator.RuleFor(x => x.Surname).NotNull();
+				validator.RuleFor(x => x.Age).GreaterThan(0);
+			});
+
+			var result = validator.Validate(new Person(), options => {
+				options.IncludeRuleSets("Test");
+				options.IncludeProperties(x => x.Surname);
+				options.SetSelectorCombineMode(ValidatorSelectorCombineMode.All);
+			});
+
+			result.Errors.Count.ShouldEqual(1);
+			result.Errors[0].PropertyName.ShouldEqual("Surname");
 		}
 
 		[Fact]
